@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:multitimer/components/form_timer.dart';
+import 'package:multitimer/models/timer.dart';
 
 class EditTimerScreen extends StatelessWidget {
   @override
+  TimerModel timer;
+  EditTimerScreen({ this.timer });
+
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Edit timer"),
-      ),
-      body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text('Go back!'),
-        ),
-      ),
-    );
+    return FormTimerComponent(timer: timer);
   }
 }

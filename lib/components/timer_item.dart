@@ -2,15 +2,38 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:multitimer/models/time.dart';
 import 'package:multitimer/models/timer.dart';
+import 'package:multitimer/screens/edit_timer.dart';
+import 'package:vibration/vibration.dart';
 
 class TimerItemComponent extends StatelessWidget {
   TimerModel timer;
   Function setTimer;
+  Function removeTimer;
   int index;
 
-  TimerItemComponent({ this.timer, this.setTimer, this.index });
+  TimerItemComponent({
+    this.timer,
+    this.setTimer,
+    this.index,
+    this.removeTimer
+  });
 
   bool timerFinished(TimeModel time) => (time.minutes <= 0 && time.seconds <= 0);
+
+  void handleEditTimer (context) async {
+    TimerModel timerUpdate = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTimerScreen(timer: timer),
+      ),
+    ) as TimerModel;
+    if (timerUpdate != null) {
+      // setTimer(timer, index);
+      print('Se actualizo');
+    } else {
+      print('No paso nada');
+    }
+  }
 
   void startTimer () {
     if (timerFinished(timer.time)) {
@@ -43,12 +66,15 @@ class TimerItemComponent extends StatelessWidget {
     this.setTimer(timer, index);
   }
 
-  void reduceTime () {
+  void reduceTime () async {
     int minutes = timer.time.minutes;
     int seconds = timer.time.seconds;
-
+    
     if (timerFinished(timer.time)) {
       restartTimer();
+      if (await Vibration.hasVibrator()) {
+        Vibration.vibrate(pattern: [500, 1000, 500, 2000]);
+      }
     } else {
       if (seconds == 0 && minutes > 0) {
         minutes--;
@@ -69,23 +95,39 @@ class TimerItemComponent extends StatelessWidget {
       return RaisedButton(
         onPressed: pauseTimer,
         textColor: Colors.white,
-        color: timer.color,
+        color: Color.fromRGBO(0, 0, 0, 0.15),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Color.fromRGBO(0, 0, 0, 0),
+            width: 3.0
+          ),
+          borderRadius: BorderRadius.circular(5.0)
+        ),
         child: Icon(
           Icons.pause,
           color: Colors.white,
           size: 32,
-        )
+        ),
+        elevation: 0,
       );
     } else {
       return RaisedButton(
         onPressed: startTimer,
         textColor: Colors.white,
-        color: timer.color,
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Color.fromRGBO(0, 0, 0, 0.15),
+            width: 3.0
+          ),
+          borderRadius: BorderRadius.circular(5.0)
+        ),
         child: Icon(
           Icons.play_arrow,
           color: Colors.white,
           size: 32,
-        )
+        ),
+        elevation: 0,
       );
     }
   }
@@ -106,7 +148,7 @@ class TimerItemComponent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0)
       ),
       margin: EdgeInsets.only(
-        bottom: 10.0
+        top: 10.0
       ),
       padding: EdgeInsets.all(20),
       child: Column(
@@ -131,16 +173,20 @@ class TimerItemComponent extends StatelessWidget {
                     tooltip: 'Remove time',
                     color: Colors.white,
                     iconSize: 32.0,
-                    onPressed: () {},
+                    onPressed: () async {
+                      restartTimer();
+                      removeTimer(index);
+                      final snackBar = SnackBar(content: Text('Timer removed!'));
+                      Scaffold.of(context).showSnackBar(snackBar);
+                    },
                   ),
                   IconButton(
                     icon: Icon(Icons.edit),
                     tooltip: 'Edit time',
                     color: Colors.white,
                     iconSize: 32.0,
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/edit');
-                    },
+                    disabledColor: Color.fromRGBO(0, 0, 0, 0.15),
+                    onPressed: timer.active? null : () => handleEditTimer(context)
                   ),
                 ],
               )
@@ -167,12 +213,20 @@ class TimerItemComponent extends StatelessWidget {
                 RaisedButton(
                   onPressed: restartTimer,
                   textColor: Colors.white,
-                  color: timer.color,
+                  color: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: Color.fromRGBO(0, 0, 0, 0.15),
+                      width: 3.0
+                    ),
+                    borderRadius: BorderRadius.circular(5.0)
+                  ),
                   child: Icon(
                     Icons.stop,
                     color: Colors.white,
                     size: 32,
-                  )
+                  ),
+                  elevation: 0,
                 ),
                 Container(
                   margin: EdgeInsets.only(right: 10.0),

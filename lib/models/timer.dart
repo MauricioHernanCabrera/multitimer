@@ -10,13 +10,14 @@ class TimerModel {
   bool active;
   Timer interval;
   Color color;
+  int id = DateTime.now().millisecondsSinceEpoch;
 
   TimerModel({
     this.time,
     this.title,
     this.active = false,
     this.defaultTime,
-    this.interval,
-    this.color,
+    this.interval = null,
+    this.color = const Color.fromRGBO(122, 199, 12, 1.0),
   });
 }
